@@ -41,7 +41,7 @@ Why: following feels limited, which pushes people to connect.
 
 ## Feeds
 - **Two kinds of posts:** *wall posts* (private, connections only) and *public posts* (go to the main feed).
-- **Home feed:** public posts from people you follow, plus wall posts from your connections. Following never unlocks wall posts.
+- **Home feed:** public posts from people you follow, plus wall posts from your connections. Following never unlocks wall posts. Once ranking arrives, it also mixes in popular public posts from people you don't follow.
 - **Community feed (Phase 2):** campus-wide; public or anonymous per post; readable by everyone at the school. Your followers also get your *public* community posts.
   - Ordering: **chronological, plus topic filters picked during onboarding**. Move to simple ranking rules (recency + engagement) once there's enough activity; a learned algorithm can't work at launch (cold start).
 
@@ -53,6 +53,8 @@ Why: following feels limited, which pushes people to connect.
 **iOS and web from day one**, as one product.
 
 **Stack:** Flutter (one Dart codebase for iOS and web) + Supabase (Postgres, magic-link auth, Storage for photos). Visibility tiers are enforced by **RLS policies** in the database, so posts a viewer may not see never reach their device.
+
+**Media:** two **private** Storage buckets, `wall-media` and `public-media`. Every file request is checked by Storage RLS with the same rule as the post (wall: connections; public: logged-in students at the school), so a forwarded link is useless to anyone else. 50 MB per file.
 
 ## Phases
 - **Phase 1:** verified signup, base/upgraded profiles, follow + connect, personal walls (locked for non-connections; text/photo posts, comments, likes, delete, report), public posts to followers, home feed. *Done: database for profiles, follows, connections.*
