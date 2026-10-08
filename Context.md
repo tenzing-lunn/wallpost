@@ -23,20 +23,21 @@ Built one at a time. Phase 1 is feature 1.
 | | How | What it gets you |
 |---|---|---|
 | **Follow** | One-way, no approval | Their posts in your home feed; counts toward their follower number (a public "hype" signal) |
-| **Connect** | Request → accept; implies mutual follow | Upgraded profile, full wall, and the ability to write on their wall |
+| **Connect** | Request → accept; implies mutual follow | Upgraded profile, full wall, and the ability to comment on their wall posts |
 
 Why: following feels limited, which pushes people to connect.
 
 ## Profiles
 - **Base (anyone at your school):** name, photo, major, follower count.
-- **Upgraded (connections only):** relationship status, interested in (free text), looking for (free text).
+- **Upgraded (connections only):** age, relationship status, interested in (free text), looking for (free text).
 
 ## Walls
-- Your wall is your private space, like an Instagram account, written on by you and your connections.
-- **Connections** can read all of it and write on it.
+- Your wall is your space, like an Instagram account. **Only you post on it.** Connections interact by **commenting** and liking. (Deliberate departure from 2004 Facebook, where friends posted on your wall.)
+- **Connections** can read all of it.
 - **Everyone else** (followers included) sees **no post content**: only how many posts there are and their shape (text or photo), drawn as a locked, blurred wall with "Connect to see." Showing even the newest post would leak the whole wall to anyone who checks often enough.
-- Posts: **text, photos, comments, likes**.
-- Posts from others appear **immediately**; the owner can **delete anything** on their wall. Every post has a **report** button.
+- Posts are **multimodal**: text, multiple photos, video, and links with previews, plus **tags** of people, **hashtags**, and a **location** (free-text place name, no GPS). Authors can **edit** their posts.
+- **Tagging:** you can tag only your connections, in posts or comments. If the tagged person isn't connected to the post's owner, they're prompted to connect before they can see it. Anyone can untag themselves.
+- The post's author can delete any comment on it; commenters can delete their own. Every post has a **report** button.
 
 ## Feeds
 - **Two kinds of posts:** *wall posts* (private, connections only) and *public posts* (go to the main feed).
@@ -65,6 +66,6 @@ TikTok videos with voiceovers, made with Claude's **motion-studio** skill: motio
 - **Who is the ideal user?** Not defined yet; campus-gating is a growth bet, not an answer.
 - **What creates FOMO/status** so people build profiles and connect? (The wall blur is the first mechanic.)
 - **Tension:** early-FB fields (relationship status, looking for) vs. "not a dating app."
-- **How do community posts get topics?** Tagged by the poster, or classified automatically?
+- **Community post topics:** likely hashtags, chosen by the poster.
 - **Moderation for photos** (explicit content) in Phase 1, and for anonymous posts in Phase 2.
 - **Deployment** for web and iOS, to be worked out at build time.
