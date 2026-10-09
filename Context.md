@@ -16,7 +16,8 @@ A Facebook-style consumer social app that launches on college campuses (Fordham 
 Built one at a time. Phase 1 is feature 1.
 
 ## Identity
-- Every account is a **verified student**, verified by **`.edu` email code / magic link** (same approach as fdudating). Each new school = a new allowed domain.
+- Every account is a **verified student**. Sign-in is **one-tap Sign in with Apple or Google** (least friction), then a **one-time code to the user's `.edu` address** proves they're a student. The school email is stored separately from the login email. Each new school = a new allowed domain.
+- **No scraped or bulk class lists.** The school won't provide one; scraping breaks school IT policy; mass email is spam.
 - Users are anonymous **to other users only**. The system always stores who wrote what, so bans, takedowns, and threat response work (industry standard: Fizz, Yik Yak, Sidechat).
 
 ## Relationships (LinkedIn-style hybrid)
@@ -65,7 +66,9 @@ Why: following feels limited, which pushes people to connect.
 TikTok videos with voiceovers, made with Claude's **motion-studio** skill: motion graphics rendered from code (kinetic type, animated app UI) with synthesized sound.
 
 ## Open questions
-- **Who is the ideal user?** Not defined yet; campus-gating is a growth bet, not an answer.
+- **Sign-in (parked until the audience is clear).** Leaning: sign in only with your school Google account (Fordham email is Google Workspace), like early Facebook's school email. The account itself means one per email, and no list is needed. Apple's education-account exemption probably removes the need for Sign in with Apple if school sign-in is the *only* way in (verify Apple's current text). Still to do: a server-side check that rejects non-school accounts, plus where allowed schools are listed. Not committed to Fordham-only.
+- **Undergrad-only?** A `.edu` address proves someone is at the school, not that they're an undergrad. Options: check whether student emails differ from staff ones, self-declared class year, or accept everyone at the school.
+- **Who is the ideal user, and what is Wallpost curating?** Not defined yet; campus-gating is a growth bet, not an answer. Blocks the sign-in decision.
 - **What creates FOMO/status** so people build profiles and connect? (The wall blur is the first mechanic.)
 - **Tension:** early-FB fields (relationship status, looking for) vs. "not a dating app."
 - **Community post topics:** likely hashtags, chosen by the poster.
