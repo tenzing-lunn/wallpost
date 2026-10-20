@@ -1,0 +1,19 @@
+{
+  "sectors": {
+    "ai_labs": ["openai", "anthropic", "deepmind", "mistral", "cohere", "hugging face", "meta ai", "fair", "allen institute"],
+    "big_tech": ["google", "meta", "apple", "amazon", "microsoft", "netflix", "nvidia"],
+    "biotech_health": ["bio", "biotech", "therapeutics", "health", "pharma", "genomics", "medical", "medicine", "hospital", "clinic"],
+    "academia": ["university", "college", "institute", "lab", "laboratory"]
+  },
+  "roles": {
+    "research": ["research", "researcher", "scientist", "phd", "postdoc", "professor"],
+    "ai_ml": ["ai", "machine learning", "ml", "deep learning", "artificial intelligence", "data scientist"],
+    "math": ["math", "mathematician", "mathematics", "statistics", "statistician", "quantitative"],
+    "founder": ["founder", "co-founder", "cofounder", "ceo", "cto", "founding"]
+  },
+  "strong_route": {
+    "sectors": ["ai_labs", "big_tech", "biotech_health", "academia"],
+    "roles": ["research", "ai_ml", "math", "founder"]
+  },
+  "personal": ["soccer", "UWC", "travel", "international experience", "movies", "running", "athletic", "lives in New York"]
+}

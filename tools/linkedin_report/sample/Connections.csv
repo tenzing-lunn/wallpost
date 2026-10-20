@@ -1,0 +1,11 @@
+Notes:
+"When exporting your connection data, you may notice that some of the email addresses are missing."
+
+First Name,Last Name,URL,Email Address,Company,Position,Connected On
+Ada,Test,https://www.linkedin.com/in/ada-test,,Anthropic,Research Scientist,01 Mar 2025
+Ben,Test,https://www.linkedin.com/in/ben-test,,Google,Software Engineer,02 Mar 2025
+Cara,Test,https://www.linkedin.com/in/cara-test,,Tiny Robotics,Co-Founder & CEO,03 Mar 2025
+Dev,Test,https://www.linkedin.com/in/dev-test,,Daily Grind Cafe,Barista,04 Mar 2025
+Eli,Test,https://www.linkedin.com/in/eli-test,,Recursion Therapeutics,Machine Learning Engineer,05 Mar 2025
+Fay,Test,https://www.linkedin.com/in/fay-test,,Goldman Sachs,Analyst,06 Mar 2025
+Gus,Test,https://www.linkedin.com/in/gus-test,,,,07 Mar 2025

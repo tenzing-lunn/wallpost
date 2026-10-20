@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F4F2EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>Who to Talk To</title>
+<style>
+  :root {
+    --accent: #0A66C2; --accent-pressed: #004182; --accent-tint: rgba(10,102,194,.10); --on-accent: #fff;
+    --canvas: #F4F2EE; --card: #FFFFFF; --card-2: #F2F2F7; --thumb: #FFFFFF;
+    --label: rgba(0,0,0,.9); --label-2: rgba(60,60,67,.62); --label-3: rgba(60,60,67,.32);
+    --separator: rgba(60,60,67,.18); --fill: rgba(120,120,128,.12);
+    --success: #34C759; --success-text: #057642; --success-tint: rgba(52,199,89,.14);
+    --warm: #B4690E; --warm-tint: rgba(231,163,62,.16);
+    --bar: rgba(244,242,238,.78); --glass: rgba(255,255,255,.72); --glass-edge: rgba(255,255,255,.6);
+    --float: 0 8px 28px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.06);
+    --card-ring: 0 0 0 .5px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --logo-s: 60%; --logo-bg: 92%; --logo-fg: 38%;
+    --ease: cubic-bezier(.25,.1,.25,1); --spring: cubic-bezier(.32,.72,0,1); --pop: cubic-bezier(.34,1.56,.64,1);
+    --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --accent: #71B7FB; --accent-pressed: #A8D4FF; --accent-tint: rgba(113,183,251,.16); --on-accent: #001A33;
+      --canvas: #000000; --card: #1B1F23; --card-2: #2C2C2E; --thumb: #636366;
+      --label: rgba(255,255,255,.92); --label-2: rgba(235,235,245,.6); --label-3: rgba(235,235,245,.3);
+      --separator: rgba(84,84,88,.55); --fill: rgba(120,120,128,.24);
+      --success: #30D158; --success-text: #30D158; --success-tint: rgba(48,209,88,.16);
+      --warm: #F8C77E; --warm-tint: rgba(231,163,62,.18);
+      --bar: rgba(0,0,0,.7); --glass: rgba(40,40,44,.66); --glass-edge: rgba(255,255,255,.12);
+      --float: 0 8px 28px rgba(0,0,0,.5); --card-ring: 0 0 0 .5px rgba(255,255,255,.08);
+      --logo-s: 45%; --logo-bg: 22%; --logo-fg: 80%;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { background: var(--canvas); }
+  body { margin: 0; background: var(--canvas); color: var(--label); font: 17px/22px -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -.43px; -webkit-font-smoothing: antialiased; touch-action: manipulation; }
+  body.locked { overflow: hidden; }
+  button { font: inherit; letter-spacing: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  svg.i.chev { width: 13px; height: 13px; stroke-width: 2.6; color: var(--label-3); }
+  .bc { white-space: nowrap; }
+  .bc.sep { margin-left: .28em; }  /* a margin, not a space: same gap whether or not the title is cut off */
+  .split { display: flex; min-width: 0; white-space: nowrap; }
+  .split .bt { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .split .bc { flex: none; max-width: 55%; overflow: hidden; text-overflow: ellipsis; }
+  .num { font-variant-numeric: tabular-nums; }
+  .one { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .app { max-width: 440px; margin: 0 auto; min-height: 100dvh; padding-bottom: calc(112px + var(--safe-b)); }
+  .screen[hidden] { display: none; }
+
+  /* Nav bar: large title collapses into a blurred bar */
+  .nav { position: sticky; top: 0; z-index: 20; height: calc(44px + var(--safe-t)); padding-top: var(--safe-t);
+    display: flex; align-items: center; justify-content: center; transition: background .2s var(--ease), box-shadow .2s var(--ease); }
+  .nav.scrolled { background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 .5px 0 var(--separator); }
+  .nav .t { font-weight: 600; opacity: 0; transform: translateY(4px); transition: opacity .2s var(--ease), transform .2s var(--ease); }
+  .nav.scrolled .t { opacity: 1; transform: none; }
+  .head { padding: 2px 20px 0; }
+  .eyebrow { font-size: 13px; line-height: 18px; letter-spacing: -.08px; font-weight: 600; text-transform: uppercase; color: var(--label-2); margin: 0; }
+  h1 { font-size: 34px; line-height: 41px; letter-spacing: .37px; font-weight: 700; margin: 0; }
+  .lede { font-size: 15px; line-height: 20px; letter-spacing: -.23px; color: var(--label-2); margin: 6px 0 0; }
+
+  /* "Going for" line and progress row under the title */
+  .goalline { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 44px; padding: 0 20px; margin-top: 2px; font-size: 15px; letter-spacing: -.23px; text-align: left; }
+  .goalline .k { color: var(--label-2); flex: none; }
+  .goalline .v { color: var(--accent); font-weight: 500; min-width: 0; }
+  .goalline svg.i.chev { color: var(--accent); width: 11px; height: 11px; }
+  .week { display: flex; align-items: center; gap: 12px; margin: 4px 20px 0; padding: 12px 0 2px; border-top: .5px solid var(--separator); }
+  .week .t { font-size: 15px; letter-spacing: -.23px; color: var(--label-2); }
+  .week .t b { color: var(--label); font-weight: 600; }
+  .pips { display: flex; gap: 6px; margin-left: auto; }
+  .pip { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--fill); color: transparent; transition: background .35s var(--ease); }
+  .pip svg.i { width: 14px; height: 14px; stroke-width: 2.8; }
+  .pip.on { background: var(--success); color: #fff; }
+  .pip.on.fresh { animation: pop .45s var(--pop); }
+  @keyframes pop { from { transform: scale(.4); } to { transform: scale(1); } }
+
+  .section { margin: 28px 16px 0; }
+  .sh { padding: 0 4px 8px; }
+  .sh h2 { font-size: 22px; line-height: 28px; letter-spacing: .35px; font-weight: 700; margin: 0; }
+  .card { background: var(--card); border-radius: 16px; box-shadow: var(--card-ring); }
+  .press { transition: transform .25s var(--ease); }
+  .press:active { transform: scale(.98); transition-duration: .1s; }
+
+  /* Avatars and logos */
+  .av { --h: 210; flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; position: relative;
+    font-weight: 600; font-size: 17px; letter-spacing: 0; color: #fff; background: linear-gradient(145deg, hsl(var(--h) 62% 58%), hsl(calc(var(--h) + 25) 58% 44%)); }
+  .av.xl { width: 72px; height: 72px; font-size: 26px; }
+  .av.l { width: 56px; height: 56px; font-size: 20px; }
+  .av.s { width: 40px; height: 40px; font-size: 15px; }
+  .av .ok { position: absolute; right: -2px; bottom: -2px; width: 20px; height: 20px; border-radius: 50%; background: var(--success); color: #fff;
+    display: grid; place-items: center; box-shadow: 0 0 0 2px var(--card); }
+  .av .ok svg.i { width: 12px; height: 12px; stroke-width: 3; }
+  .av.s .ok { width: 16px; height: 16px; right: -3px; bottom: -3px; }
+  .av.s .ok svg.i { width: 10px; height: 10px; }
+  .logo { --h: 210; flex: none; width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center; font-weight: 700; font-size: 17px; letter-spacing: 0;
+    color: hsl(var(--h) var(--logo-s) var(--logo-fg)); background: hsl(var(--h) var(--logo-s) var(--logo-bg)); }
+  .logo.s { width: 40px; height: 40px; border-radius: 9px; font-size: 16px; }
+
+  /* Hero */
+  .hero { padding: 18px 20px 6px; margin: 16px 16px 0; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--accent); }
+  .tag svg.i { width: 14px; height: 14px; stroke-width: 2.2; }
+  .who { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+  .who > div { min-width: 0; }
+  .who .n { font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: .35px; }
+  .who .r { font-size: 15px; line-height: 20px; color: var(--label-2); letter-spacing: -.23px; margin-top: 2px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .who .r b { color: var(--label); font-weight: 500; }
+  .why { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 10px; }
+  .why li { display: flex; align-items: center; gap: 10px; font-size: 15px; line-height: 20px; letter-spacing: -.23px; }
+  .why .ic { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: var(--accent-tint); color: var(--accent); flex: none; }
+  .why .ic svg.i { width: 16px; height: 16px; stroke-width: 2; }
+  .why li.warm .ic { background: var(--warm-tint); color: var(--warm); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 999px; font-size: 13px; letter-spacing: -.08px; font-weight: 500;
+    background: var(--fill); color: var(--label-2); }
+  .chip svg.i { width: 14px; height: 14px; stroke-width: 2.1; color: var(--accent); }
+  .chip.warm svg.i { color: var(--warm); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 50px; padding: 0 18px; border-radius: 999px; white-space: nowrap;
+    font-size: 17px; font-weight: 600; letter-spacing: -.43px; width: 100%; transition: transform .25s var(--ease), background .2s var(--ease), opacity .2s; }
+  .btn:active { transform: scale(.97); transition-duration: .1s; }
+  .btn svg.i { width: 20px; height: 20px; stroke-width: 2; }
+  .btn.primary { background: var(--accent); color: var(--on-accent); }
+  .btn.primary:active { background: var(--accent-pressed); }
+  .btn.tinted { background: var(--accent-tint); color: var(--accent); }
+  .btn.green { background: var(--success); color: #fff; }
+  .btn.plain { background: var(--fill); color: var(--label); }
+  .pill { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 14px; border-radius: 999px; font-size: 15px; font-weight: 600;
+    letter-spacing: -.23px; background: var(--accent-tint); color: var(--accent); }
+  .pill svg.i { width: 16px; height: 16px; stroke-width: 2.2; display: none; }
+  .hero .btn.primary { margin-top: 20px; }
+  .subrow { display: flex; justify-content: center; }
+  .link { font-size: 15px; letter-spacing: -.23px; color: var(--accent); padding: 0 12px; min-height: 44px; }
+  .link.muted { color: var(--label-2); }
+
+  /* Grouped list of compact people */
+  .list { overflow: hidden; }
+  .mini { display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 16px; width: 100%; text-align: left; position: relative; min-height: 72px; }
+  .mini + .mini::before, .row + .row::before { content: ""; position: absolute; top: 0; right: 0; height: .5px; background: var(--separator); }
+  .mini + .mini::before { left: 76px; }
+  .mini:active, .row:active { background: var(--fill); }
+  .mini .body, .row .body { flex: 1; min-width: 0; }
+  .mini .n { font-size: 17px; font-weight: 600; }
+  .mini .r { font-size: 15px; line-height: 20px; color: var(--label-2); letter-spacing: -.23px; }
+  .mini .hint { display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 13px; line-height: 18px; letter-spacing: -.08px; color: var(--accent); }
+  .mini .hint svg.i { width: 13px; height: 13px; stroke-width: 2.2; }
+  .mini .hint span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mini .hint.warm { color: var(--warm); }
+  .mini.done .n { color: var(--label-2); }
+  .mini .cta { flex: none; }
+  .sent { font-size: 15px; font-weight: 600; color: var(--success-text); display: inline-flex; align-items: center; gap: 4px; }
+  .sent svg.i { width: 16px; height: 16px; stroke-width: 2.6; }
+  @media (max-width: 359px) { .mini .pill { width: 36px; height: 36px; padding: 0; font-size: 0; } .mini .pill svg.i { display: block; } }
+
+  /* Celebration */
+  .celebrate { padding: 28px 20px 22px; margin: 16px 16px 0; text-align: center; }
+  .celebrate h3 { font-size: 22px; line-height: 28px; margin: 16px 0 4px; letter-spacing: .35px; }
+  .celebrate p { margin: 0 0 18px; color: var(--label-2); font-size: 15px; line-height: 20px; letter-spacing: -.23px; }
+  .celebrate p:last-child { margin-bottom: 0; }
+
+  /* Ring */
+  .ring { display: block; margin: 0 auto; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-linecap: round; }
+  .ring .track { stroke: var(--accent-tint); }
+  .ring .bar { stroke: var(--accent); transition: stroke-dashoffset 1s cubic-bezier(.65,0,.35,1); }
+  .ring.green .track { stroke: var(--success-tint); }
+  .ring.green .bar { stroke: var(--success); }
+  .ringwrap { position: relative; width: max-content; margin: 0 auto; }
+  .ringwrap .mid { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+  .ringwrap .big { font-size: 44px; line-height: 48px; font-weight: 700; letter-spacing: -.5px; }
+  .ringwrap .of { font-size: 13px; color: var(--label-2); letter-spacing: -.08px; font-weight: 500; }
+  .ringwrap .bigcheck { color: var(--success); display: grid; }
+  .ringwrap .bigcheck svg.i { width: 56px; height: 56px; stroke-width: 3; }
+
+  /* Companies */
+  .cover { padding: 24px 20px 20px; margin: 16px 16px 0; text-align: center; }
+  .cover p { font-size: 17px; line-height: 22px; margin: 16px auto 0; max-width: 300px; }
+  .cover small { display: block; margin-top: 6px; font-size: 15px; line-height: 20px; color: var(--label-2); letter-spacing: -.23px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 6px; padding: 18px 10px; }
+  .co { display: grid; justify-items: center; align-content: start; gap: 6px; text-align: center; min-width: 0; }
+  .co .nm { font-size: 11px; line-height: 13px; letter-spacing: .06px; color: var(--label-2); max-width: 80px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: normal; word-break: normal; hyphens: none; }
+  .co .logo { position: relative; width: 52px; height: 52px; border-radius: 13px; font-size: 20px; background: var(--fill); color: var(--label-3); }
+  .co .nm.word { display: block; white-space: nowrap; text-overflow: ellipsis; }
+  .co .lk { position: absolute; bottom: -4px; right: -4px; width: 20px; height: 20px; border-radius: 50%; background: var(--card); color: var(--label-3); display: grid; place-items: center; box-shadow: 0 0 0 .5px var(--separator); }
+  .co .lk svg.i { width: 11px; height: 11px; stroke-width: 2.4; }
+  .more { display: block; width: 100%; min-height: 44px; font-size: 15px; color: var(--accent); border-top: .5px solid var(--separator); letter-spacing: -.23px; }
+  .loop { display: flex; gap: 12px; align-items: flex-start; padding: 16px; margin: 12px 16px 0; font-size: 15px; line-height: 20px; letter-spacing: -.23px; color: var(--label-2); }
+  .loop svg.i { color: var(--accent); margin-top: -1px; }
+
+  /* Inset grouped rows */
+  .row { display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 16px; width: 100%; text-align: left; min-height: 64px; position: relative; }
+  .row + .row::before { left: 68px; }
+  .list.ranked .row + .row::before { left: 100px; }
+  .row .n { font-size: 17px; line-height: 22px; }
+  .row .r { font-size: 15px; line-height: 20px; letter-spacing: -.23px; color: var(--label-2); }
+  .row .rk { width: 20px; font-size: 13px; color: var(--label-3); text-align: right; flex: none; font-weight: 600; letter-spacing: 0; }
+  .step { align-items: flex-start; padding-top: 14px; padding-bottom: 14px; }
+  .step .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-tint); color: var(--accent); flex: none; }
+  .step .n { font-weight: 600; }
+  .step .r { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-top: 1px; }
+  .step svg.i.chev { align-self: center; }
+  .unhide { flex: none; font-size: 15px; color: var(--accent); min-height: 44px; padding: 0 4px; }
+  .foot { font-size: 13px; line-height: 18px; letter-spacing: -.08px; color: var(--label-2); padding: 8px 16px 0; margin: 0; }
+  .gh { font-size: 13px; line-height: 18px; letter-spacing: -.08px; color: var(--label-2); text-transform: uppercase; padding: 0 16px 7px; margin: 0; }
+  .search { display: flex; align-items: center; gap: 6px; height: 36px; margin: 14px 16px 0; padding: 0 8px; border-radius: 10px; background: var(--fill); color: var(--label-2); }
+  .search svg.i { width: 18px; height: 18px; }
+  .search input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; color: var(--label); outline: none; }
+  .search input::placeholder { color: var(--label-2); }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; margin: 12px 16px 0; padding: 2px; border-radius: 9px; background: var(--fill); position: relative; height: 32px; }
+  .seg .thumb { position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px); border-radius: 7px; background: var(--thumb);
+    box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 3px 1px rgba(0,0,0,.04); transition: transform .25s var(--spring); }
+  .seg[data-i="1"] .thumb { transform: translateX(100%); }
+  .seg button { position: relative; z-index: 1; font-size: 13px; font-weight: 600; letter-spacing: -.08px; }
+  .empty { padding: 28px 20px; text-align: center; color: var(--label-2); font-size: 15px; }
+
+  /* Tab bar: floating glass capsule */
+  .tabs { position: fixed; z-index: 30; left: 50%; bottom: calc(10px + var(--safe-b)); transform: translateX(-50%); width: min(360px, calc(100% - 32px));
+    display: grid; grid-template-columns: repeat(3, 1fr); padding: 6px; border-radius: 999px;
+    background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: var(--float), inset 0 0 0 .5px var(--glass-edge); }
+  .tab { display: grid; justify-items: center; gap: 2px; padding: 6px 0 5px; border-radius: 999px; color: var(--label-2); font-size: 10px; line-height: 12px; letter-spacing: .1px; font-weight: 600; }
+  .tab svg.i { width: 24px; height: 24px; }
+  .tab[aria-current="page"] { color: var(--accent); background: var(--accent-tint); }
+
+  /* Sheet */
+  .scrim { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.28); opacity: 0; pointer-events: none; transition: opacity .35s var(--ease); }
+  .scrim.on { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; z-index: 41; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 440px; max-height: calc(100dvh - var(--safe-t) - 12px);
+    background: var(--card); border-radius: 28px 28px 0 0; box-shadow: 0 -2px 20px rgba(0,0,0,.15); display: flex; flex-direction: column;
+    transform: translateY(105%); visibility: hidden; transition: transform .48s var(--spring), visibility 0s .48s; }
+  .sheet:focus { outline: none; }
+  .sheet.on { transform: none; visibility: visible; transition: transform .48s var(--spring), visibility 0s 0s; }
+  .sheet .grab { flex: none; height: 22px; display: grid; place-items: center; touch-action: none; cursor: grab; }
+  .sheet .grab::before { content: ""; width: 36px; height: 5px; border-radius: 3px; background: var(--label-3); }
+  .sheet .sb { overflow-y: auto; padding: 0 20px calc(20px + var(--safe-b)); overscroll-behavior: contain; }
+  .sheet .top { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; margin: -4px -8px 8px; }
+  .sheet .top h3 { margin: 0; font-size: 17px; font-weight: 600; text-align: center; grid-column: 2; }
+  .x { grid-column: 3; width: 44px; height: 44px; display: grid; place-items: center; color: var(--label-2); }
+  .x span { width: 30px; height: 30px; border-radius: 50%; background: var(--fill); display: grid; place-items: center; }
+  .x svg.i { width: 13px; height: 13px; stroke-width: 2.8; }
+  .sheet .who { margin-top: 0; }
+  .sheet .who .n a:active { opacity: .6; }
+  .msg { margin-top: 20px; }
+  .msg label { display: block; font-size: 13px; line-height: 18px; letter-spacing: -.08px; color: var(--label-2); text-transform: uppercase; padding: 0 4px 7px; }
+  textarea { display: block; width: 100%; font: inherit; font-size: 17px; line-height: 23px; letter-spacing: -.43px; color: var(--label); background: var(--card-2);
+    border: 0; border-radius: 14px; padding: 14px 16px; resize: none; outline: none; min-height: 120px; max-height: 38vh; overflow-y: auto; }
+  textarea:focus { box-shadow: 0 0 0 2px var(--accent); }
+  @media (max-height: 700px) {  /* small phones: keep the send button on screen while the draft scrolls */
+    .sheet .stack { position: sticky; bottom: calc(-20px - var(--safe-b)); background: var(--card); padding: 12px 0 calc(20px + var(--safe-b));
+      margin-bottom: calc(-20px - var(--safe-b)); box-shadow: 0 -.5px 0 var(--separator); }
+    textarea { max-height: 30vh; }
+  }
+  .tip { font-size: 13px; line-height: 18px; letter-spacing: -.08px; color: var(--label-2); padding: 7px 4px 0; margin: 0; }
+  .stack { display: grid; gap: 10px; margin-top: 18px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .done-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 6px 0 16px; min-height: 52px; border-radius: 14px; background: var(--success-tint); color: var(--success-text); font-weight: 600; }
+  .done-row span { display: inline-flex; align-items: center; gap: 8px; }
+  .done-row button { font-size: 15px; font-weight: 400; color: var(--label-2); min-height: 44px; padding: 0 10px; }
+  .ask { padding: 16px; border-radius: 16px; background: var(--card-2); display: grid; gap: 12px; text-align: center; font-size: 17px; }
+  .actions { margin: 6px 0 0; border-radius: 14px; overflow: hidden; background: var(--card-2); }
+  .actions button { display: block; width: 100%; text-align: left; padding: 13px 16px; font-size: 17px; position: relative; }
+  .actions button + button::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--separator); }
+  .actions button:active { background: var(--fill); }
+  .actions small { display: block; font-size: 13px; line-height: 18px; color: var(--label-2); letter-spacing: -.08px; margin-top: 2px; }
+  .sheet .lead { font-size: 15px; line-height: 20px; color: var(--label-2); letter-spacing: -.23px; margin: 0 0 14px; text-align: center; }
+  .toggles { border-radius: 14px; overflow: hidden; background: var(--card-2); }
+  .toggles label { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 0 16px; position: relative; }
+  .toggles label + label::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: .5px; background: var(--separator); }
+  .switch { appearance: none; -webkit-appearance: none; flex: none; width: 51px; height: 31px; border-radius: 16px; background: var(--fill); position: relative; margin: 0; cursor: pointer; transition: background .25s var(--ease); }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff;
+    box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 3px 1px rgba(0,0,0,.06); transition: transform .25s var(--spring); }
+  .switch:checked { background: var(--success); }
+  .switch:checked::after { transform: translateX(20px); }
+  .burst { position: absolute; inset: 0; display: grid; place-items: center; background: var(--card); border-radius: 28px 28px 0 0; z-index: 2; animation: fade .2s var(--ease); }
+  .burst .c { width: 88px; height: 88px; border-radius: 50%; background: var(--success); color: #fff; display: grid; place-items: center; animation: pop .5s var(--pop); margin: 0 auto; }
+  .burst .c svg.i { width: 46px; height: 46px; stroke-width: 3; }
+  .burst p { margin: 14px 0 0; font-size: 20px; font-weight: 700; text-align: center; letter-spacing: .38px; }
+  .burst small { display: block; font-size: 15px; font-weight: 400; color: var(--label-2); margin-top: 4px; letter-spacing: -.23px; }
+  @keyframes fade { from { opacity: 0; } }
+
+  /* Toast */
+  .toast { position: fixed; z-index: 60; left: 50%; top: calc(10px + var(--safe-t)); transform: translate(-50%, calc(-100% - 20px - var(--safe-t))); visibility: hidden;
+    padding: 0 8px 0 16px; min-height: 44px; border-radius: 999px; max-width: calc(100% - 32px);
+    background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: var(--float), inset 0 0 0 .5px var(--glass-edge);
+    font-size: 15px; font-weight: 600; letter-spacing: -.23px; display: flex; align-items: center; gap: 8px; transition: transform .45s var(--spring), visibility 0s .45s; white-space: nowrap; }
+  .toast.on { transform: translate(-50%, 0); visibility: visible; transition: transform .45s var(--spring), visibility 0s 0s; }
+  .toast > svg.i { width: 18px; height: 18px; color: var(--success); stroke-width: 2.6; }
+  .toast > span { padding-right: 8px; }
+  .toast button { color: var(--accent); font-weight: 600; min-height: 44px; padding: 0 10px; margin-left: -4px; }
+
+  /* Intro story */
+  .intro { position: fixed; inset: 0; z-index: 80; color: #fff; overflow: hidden;
+    background: radial-gradient(120% 80% at 80% 0%, #2C8BE6 0%, transparent 60%), linear-gradient(170deg, #0A66C2 0%, #004182 70%, #00294F 100%); }
+  .intro[hidden] { display: none; }
+  .intro .bars { position: absolute; left: 0; right: 0; top: calc(10px + var(--safe-t)); display: flex; gap: 4px; padding: 0 12px; max-width: 440px; margin: 0 auto; }
+  .intro .bars i { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,.3); overflow: hidden; }
+  .intro .bars i::after { content: ""; display: block; height: 100%; width: 0; background: #fff; transition: width .35s var(--ease); }
+  .intro .bars i.on::after { width: 100%; }
+  .intro .skip { position: absolute; z-index: 2; top: calc(18px + var(--safe-t)); right: max(8px, calc(50% - 212px)); color: rgba(255,255,255,.85); font-size: 15px; font-weight: 600; min-height: 44px; padding: 0 12px; }
+  .intro .stage { position: absolute; inset: 0; max-width: 440px; margin: 0 auto; padding: calc(56px + var(--safe-t)) 28px calc(130px + var(--safe-b)); display: flex; flex-direction: column; justify-content: center; }
+  .intro .stage:focus { outline: none; }
+  .intro button:focus-visible { outline: 2px solid rgba(255,255,255,.8); outline-offset: 4px; border-radius: 999px; }
+  .intro .k { font-size: 15px; font-weight: 600; letter-spacing: .2px; text-transform: uppercase; opacity: .75; }
+  .intro .hn { font-size: 96px; line-height: 1; font-weight: 800; letter-spacing: -3px; margin: 18px 0 12px; }
+  .intro .hn small { font-size: 40px; letter-spacing: -1px; font-weight: 700; opacity: .7; }
+  .intro h2 { font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: .2px; margin: 0; }
+  .intro p { font-size: 17px; line-height: 24px; opacity: .82; margin: 14px 0 0; max-width: 330px; }
+  .intro .chips span { padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,.16); font-size: 15px; font-weight: 600; letter-spacing: -.23px; }
+  .intro .chips { gap: 8px; margin-top: 22px; }
+  .intro .who .av { box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+  .intro .who .r { color: rgba(255,255,255,.8); }
+  .intro .why .ic, .intro .why li.warm .ic { background: rgba(255,255,255,.16); color: #fff; }
+  .intro .bottom { position: absolute; left: 28px; right: 28px; bottom: calc(36px + var(--safe-b)); display: grid; justify-items: center; }
+  .intro .next { color: rgba(255,255,255,.75); font-size: 15px; font-weight: 600; min-height: 44px; padding: 0 16px; }
+  .intro .btn.white { background: #fff; color: #0A66C2; }
+  .intro .dots { display: grid; grid-template-columns: repeat(10, 1fr); gap: 7px; margin-top: 26px; max-width: 300px; }
+  .intro .dots i { aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.2); }
+  .intro .dots i.on { background: #fff; }
+  .rise > * { animation: rise .55s var(--spring) both; }
+  .rise > *:nth-child(2) { animation-delay: .08s; } .rise > *:nth-child(3) { animation-delay: .16s; }
+  .rise > *:nth-child(4) { animation-delay: .24s; } .rise > *:nth-child(5) { animation-delay: .32s; } .rise > *:nth-child(6) { animation-delay: .4s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 90; overflow: hidden; }
+  .confetti i { position: absolute; top: -12px; width: 8px; height: 12px; border-radius: 2px; animation: fall var(--d) cubic-bezier(.2,.6,.4,1) forwards; }
+  @keyframes fall { to { transform: translate(var(--x), 105vh) rotate(var(--r)); opacity: .9; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .nav.scrolled, .tabs, .toast { background: var(--card); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="screen" id="s-today">
+    <div class="nav"><span class="t">This Week</span></div>
+    <header class="head">
+      <p class="eyebrow" id="date"></p>
+      <h1>This Week</h1>
+    </header>
+    <button class="goalline" id="goalline"></button>
+    <div id="week"></div>
+    <div id="today"></div>
+    <div class="subrow" style="margin-top:14px;flex-direction:column;align-items:center"><button class="link" id="to-all"></button><button class="link muted" id="replay">Replay your network recap</button></div>
+  </section>
+
+  <section class="screen" id="s-targets" hidden>
+    <div class="nav"><span class="t">Companies</span></div>
+    <header class="head"><h1>Companies</h1><p class="lede">Where you saved jobs, and who can get you in.</p></header>
+    <div id="targets"></div>
+  </section>
+
+  <section class="screen" id="s-all" hidden>
+    <div class="nav"><span class="t">Everyone</span></div>
+    <header class="head"><h1>Everyone</h1></header>
+    <label class="search"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search name, company or title" autocomplete="off" aria-label="Search"></label>
+    <div class="seg" id="seg" data-i="0"><span class="thumb"></span><button data-i="0"></button><button data-i="1"></button></div>
+    <div id="all"></div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Sections">
+  <button class="tab" data-tab="today" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>This Week</button>
+  <button class="tab" data-tab="targets"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 8h8v13M2 21h20M8 8h.01M8 12h.01M8 16h.01M16 12h.01M16 16h.01"/></svg>Companies</button>
+  <button class="tab" data-tab="all"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.8.7 3 2.4 3.5 5.2"/></svg>Everyone</button>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Person" tabindex="-1"><div class="grab" id="grab" aria-hidden="true"></div><div class="sb" id="sb"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="Your network recap" hidden></div>
+
+<script>
+const DATA = __DATA__;
+const LABEL = Object.fromEntries(DATA.tracks.map(t => [t.key, t.label]));
+const WANT = { swe: "software engineering internships", quant: "quant internships", ai: "AI/ML internships",
+  markets: "markets and investing internships", startups: "early-stage startups" };
+const WORK = { engineering: "engineering", research: "research", quant: "quant/trading", data: "data science",
+  finance: "finance", founder_exec: "founder", product: "product", business: "business", education: "teaching" };
+const REAL = new Set(["firm", "startup", "research_org"]);
+const MARKETS = new Set(["banking_markets", "investment_vc", "quant_trading"]);
+let session = {};  // corrections, goals and progress made on this page
+try { session = JSON.parse(localStorage.getItem("talk-session") || "{}"); } catch {}
+const keep = () => { try { localStorage.setItem("talk-session", JSON.stringify(session)); } catch {} };
+const goals = new Set(session.goals || DATA.tracks.filter(t => t.count > 0).map(t => t.key));
+const marked = new Set(Object.keys(session).filter(k => k.startsWith("done:")).map(k => k.slice(5)));
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const animated = new Set();  // numbers and rings animate once, not on every render
+let ranked = [], people = [];
+
+// A week starts Monday. A new week starts a new batch; anyone not yet messaged carries over.
+// Checked again whenever the app comes back to the foreground: iOS can keep a home-screen app open for days.
+const weekNow = () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
+let WEEK = weekNow();
+function rollWeek() {
+  WEEK = weekNow();
+  if (session.week === WEEK) return false;
+  session.week = WEEK; session.batch = (session.batch || []).filter(u => !marked.has(u)); keep();
+  return true;
+}
+rollWeek();
+const sentThisWeek = () => session["sent:" + WEEK] || 0;
+
+const ICON = {
+  work: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
+  saved: '<path d="M6 3h12v18l-6-4-6 4z"/>',
+  follow: '<path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>',
+  hires: '<path d="M4 21V5l8-2v18M12 8h8v13M2 21h20"/>',
+  shared: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',
+  note: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+  inbound: '<path d="M17 7L7 17M7 9v8h8"/>',
+  recent: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  send: '<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  open: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  chev: '<path d="M9 5l7 7-7 7"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  star: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+  bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
+  people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.8.7 3 2.4 3.5 5.2"/>',
+};
+function icon(name, cls = "") {
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("class", ("i " + cls).trim()); s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("aria-hidden", "true");
+  s.innerHTML = ICON[name];
+  return s;
+}
+const chev = () => icon("chev", "chev");
+
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k.startsWith("on")) e[k] = v; else if (k === "style") e.style.cssText = v; else e.setAttribute(k, v);
+  }
+  for (const k of kids) if (k != null && k !== false) e.append(k);
+  return e;
+}
+
+const HUES = [211, 232, 258, 282, 318, 350, 12, 28, 190];  // no greens: green means "sent"
+const hash = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 9973, 7);
+const initials = name => name.split(/\s+/).map(w => (w.match(/\p{L}/u) || [""])[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+function avatar(p, size = "") {
+  return el("span", { class: "av " + size, style: `--h:${HUES[hash(p.name) % HUES.length]}`, "aria-hidden": "true" }, initials(p.name),
+    marked.has(p.url) ? el("span", { class: "ok" }, icon("check")) : null);
+}
+function logo(name, cls = "") {
+  const letter = (name.replace(/^the\s+/i, "").match(/[\p{L}0-9]/u) || ["?"])[0].toUpperCase();
+  return el("span", { class: "logo " + cls, style: `--h:${190 + hash(name) % 140}`, "aria-hidden": "true" }, letter);
+}
+const byline = p => [p.position, p.company].filter(Boolean).join(" · ") || "No title listed";
+// Title, then company kept whole: wraps or truncates the title first, never strands the "·".
+const bylineEl = (p, cls = "r") => el("div", { class: cls }, p.position ? el("span", { class: "bt" }, p.position.trim()) : null,
+  p.company ? el("span", { class: p.position ? "bc sep" : "bc" }, (p.position ? "· " : "") + p.company) : null, !p.position && !p.company ? "No title listed" : null);
+const listOf = xs => xs.length < 2 ? xs.join("") : xs.slice(0, -1).join(", ") + (xs.length > 2 ? "," : "") + " or " + xs[xs.length - 1];
+
+// Apply this session's corrections on top of the engine's judgments.
+function view(p) {
+  // A low-confidence AI label counts as "couldn't judge", never as a fact.
+  const guess = x => x.source === "claude" && x.confidence === "low";
+  const org = { ...p.org, ...(guess(p.org) ? { kind: "unknown" } : {}), ...(session["org:" + p.orgKey] || {}) };
+  const role = { ...p.role, ...(guess(p.role) ? { function: "unknown" } : {}), ...(session["title:" + p.titleKey] || {}) };
+  return { ...p, org, role, hidden: session["person:" + p.url] ?? !!p.hidden };
+}
+
+function tracksOf(p) {
+  const { function: f, domains } = p.role, t = new Set();
+  if (f === "engineering") { t.add("swe"); if (domains.includes("ai")) t.add("ai"); }
+  if ((f === "research" || f === "data") && (domains.includes("ai") || p.org.industry === "ai" || f === "data")) t.add("ai");
+  if (f === "quant") t.add("quant");
+  if (f === "finance" && MARKETS.has(p.org.industry)) t.add("markets");
+  if (f === "founder_exec" && p.org.kind === "startup") t.add("startups");
+  return [...t];
+}
+
+function score(p) {
+  if (!goals.size) return { p, tracks: [], score: 0 };
+  const real = REAL.has(p.org.kind) || (p.org.kind === "school" && p.role.function === "research"
+    && !["intern", "student"].includes(p.role.seniority));
+  const tracks = real ? tracksOf(p).filter(t => goals.has(t)) : [];
+  let fit = 0;
+  // Inside a firm that hires interns for one of your goals (open listings data).
+  const hiring = !p.target && p.org.hires.some(t => goals.has(t));
+  if (tracks.length) fit = p.target === "saved" ? 3 : p.target === "follow" ? 2.5 : hiring ? 2.5 : 2;
+  else if (p.target && real) fit = p.target === "saved" ? 1.5 : 1;
+  if (!fit) return { p, tracks, score: 0 };
+  const level = { leader: 0.7, founder: 0.85, senior: 0.9 }[p.role.seniority] || 1;
+  const warm = (p.shared ? 1.5 : 0) + (p.note ? 1 : 0) + (p.theyInvited ? 0.5 : 0) + (p.days != null && p.days <= 90 ? 0.5 : 0);
+  return { p, tracks, score: fit * level * (1 + warm / 4) };
+}
+const rankOf = p => ranked.find(r => r.p.url === p.url) || score(p);
+
+// Why this person: [icon, text, warm?], strongest first.
+function reasons({ p, tracks }) {
+  const out = [];
+  if (tracks.length) out.push(["work", `Does ${WORK[p.role.function] || p.role.function} work${p.role.domains.includes("ai") && p.role.function !== "research" ? " in AI" : ""}`]);
+  if (p.target === "saved") out.push(["saved", `You saved a job at ${p.company}`]);
+  if (p.target === "follow") out.push(["follow", `You follow ${p.company}`]);
+  if (!p.target && tracks.length && p.org.hires.some(t => goals.has(t))) out.push(["hires", `${p.company} hires interns in your field`]);
+  if (p.shared) out.push(["shared", `${p.shared}, like you`, true]);
+  if (p.note) out.push(["note", p.theyInvited ? "Wrote you a note when connecting" : "You wrote them a note", true]);
+  else if (p.theyInvited) out.push(["inbound", "They reached out to you first", true]);
+  if (p.days != null && p.days <= 90) out.push(["recent", p.days < 14 ? "Connected in the last 2 weeks" : "Connected recently", true]);
+  return out;
+}
+const whyList = (r, max = 9) => el("ul", { class: "why" }, ...reasons(r).slice(0, max).map(([ic, t, w]) =>
+  el("li", { class: w ? "warm" : "" }, el("span", { class: "ic" }, icon(ic)), t)));
+const whyChips = r => el("div", { class: "chips" }, ...reasons(r).map(([ic, t, w]) => el("span", { class: "chip" + (w ? " warm" : "") }, icon(ic), t)));
+
+function opener({ p, tracks }, introFor) {
+  const school = DATA.school || "college";
+  const intro = p.shared === DATA.school ? `fellow ${school} student here.`
+    : p.shared ? `I noticed we're both part of the ${p.shared} community. I'm a student at ${school}.`
+    : `I'm a student at ${school}.`;
+  const want = tracks.length ? WANT[tracks[0]] : `opportunities at ${p.company}`;
+  const saw = p.position ? `your role as ${p.position}${p.company ? " at " + p.company : ""}` : `that you're at ${p.company}`;
+  if (introFor) return `Hi ${p.first}, ${intro} I'm looking at ${want}, and I saw ${saw}. I'm also trying to learn more about ${listOf(introFor)}. Do you happen to know anyone there who'd be open to a quick chat? No pressure at all if not.`;
+  return `Hi ${p.first}, ${intro} I'm looking at ${want}, and I saw ${saw}. I'd love to hear how you got there and what you'd focus on in my position. Would you be open to a quick 15-minute call in the next couple of weeks?`;
+}
+
+async function save(type, key, value) {
+  try { await fetch("/correct", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type, key, value }) }); }
+  catch { /* opened as a file: the fix still applies here via localStorage */ }
+}
+
+/* ---------- motion helpers ---------- */
+function countUp(node, to, key, ms = 900) {
+  if (reduce || animated.has(key)) { node.textContent = to; return; }
+  animated.add(key);
+  const t0 = performance.now();
+  const step = now => {
+    const k = Math.min(1, (now - t0) / ms), e = k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+    node.textContent = Math.round(to * e);
+    if (k < 1) requestAnimationFrame(step);
+  };
+  node.textContent = 0; requestAnimationFrame(step);
+}
+function ring(frac, size, stroke, key, cls = "") {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "ring " + cls); svg.setAttribute("width", size); svg.setAttribute("height", size); svg.setAttribute("aria-hidden", "true");
+  svg.innerHTML = `<circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"/>` +
+    `<circle class="bar" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" stroke-dasharray="${c}" stroke-dashoffset="${c}"/>`;
+  const bar = svg.lastChild, target = c * (1 - Math.max(frac, frac > 0 ? 0.02 : 0));
+  if (frac < 0.1) bar.style.strokeLinecap = "butt";  // a short round-capped arc reads as a dot
+  if (reduce || animated.has(key)) { bar.style.transition = "none"; bar.setAttribute("stroke-dashoffset", target); }
+  else { animated.add(key); requestAnimationFrame(() => requestAnimationFrame(() => bar.setAttribute("stroke-dashoffset", target))); }
+  return svg;
+}
+function confetti() {
+  if (reduce) return;
+  const colors = ["#0A66C2", "#71B7FB", "#34C759", "#E7A33E", "#FF9500", "#ffffff"];
+  const box = el("div", { class: "confetti" });
+  for (let i = 0; i < 46; i++) box.append(el("i", { style: `left:${Math.random() * 100}%;background:${colors[i % colors.length]};` +
+    `--x:${(Math.random() - .5) * 160}px;--r:${(Math.random() - .5) * 900}deg;--d:${1.4 + Math.random()}s;animation-delay:${Math.random() * .25}s` }));
+  document.body.append(box); setTimeout(() => box.remove(), 2800);
+}
+let toastTimer;
+function toast(text, undo, ok = true) {
+  const t = document.getElementById("toast"), ms = undo ? 8000 : 1900;
+  t.replaceChildren(...[ok && icon("check"), el("span", {}, text),
+    undo && el("button", { onclick: () => { t.classList.remove("on"); undo(); } }, "Undo")].filter(Boolean));
+  t.classList.add("on");
+  const hide = () => { clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("on"), ms); };
+  // Hold an Undo toast while it's being pointed at or focused.
+  t.onpointerenter = t.onfocusin = () => clearTimeout(toastTimer);
+  t.onpointerleave = t.onfocusout = hide;
+  hide();
+}
+
+/* ---------- sheet ---------- */
+const sheet = document.getElementById("sheet"), scrim = document.getElementById("scrim"), sb = document.getElementById("sb");
+const shell = [document.querySelector(".app"), document.querySelector(".tabs")];
+let sheetR = null, lastFocus = null, onClose = null;
+function openSheet(nodes, label) {
+  if (!sheet.classList.contains("on")) lastFocus = document.activeElement;
+  onClose = null;
+  sheet.querySelector(".burst")?.remove();
+  sb.replaceChildren(...nodes.filter(Boolean)); sb.scrollTop = 0; sheet.setAttribute("aria-label", label);
+  sheet.style.transform = ""; sheet.classList.add("on"); scrim.classList.add("on"); document.body.classList.add("locked");
+  shell.forEach(n => n.inert = true);
+  sb.querySelector("textarea")?.dispatchEvent(new Event("fit"));
+  sheet.focus({ preventScroll: true });
+}
+function closeSheet() {
+  if (!sheet.classList.contains("on")) return;
+  sheet.classList.remove("on"); scrim.classList.remove("on"); document.body.classList.remove("locked"); sheetR = null;
+  shell.forEach(n => n.inert = false);
+  lastFocus?.isConnected && lastFocus.focus({ preventScroll: true });
+  const f = onClose; onClose = null; f?.();
+}
+scrim.onclick = closeSheet;
+addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
+// "Did you message X?" survives iOS unloading the page while they're in LinkedIn.
+// It is asked on return (or reload within 6 hours). Never marked for them.
+const pendingAsk = () => {
+  const a = session.awaiting;
+  if (!a || Date.now() - a.t > 6 * 3600e3) return null;
+  const p = people.find(x => x.url === a.url);
+  return p && !(a.introFor ? session["asked:" + p.url] : marked.has(p.url)) ? { r: rankOf(p), introFor: a.introFor } : null;
+};
+const clearAsk = () => { delete session.awaiting; keep(); };
+function askIfPending() {
+  const a = pendingAsk();
+  if (a && !sheet.classList.contains("on")) personSheet(a.r, { asking: true, introFor: a.introFor });
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  setDate(); if (rollWeek()) render();
+  askIfPending();
+});
+
+// Keep the sheet above the iOS keyboard.
+const fitViewport = () => {
+  const vv = visualViewport;
+  if (Math.abs(vv.height - innerHeight) < 1) { sheet.style.bottom = sheet.style.maxHeight = ""; return; }
+  const safeTop = parseFloat(getComputedStyle(document.querySelector(".nav")).paddingTop) || 0;  // resolves env(safe-area-inset-top)
+  sheet.style.bottom = Math.max(0, innerHeight - vv.height - vv.offsetTop) + "px";
+  sheet.style.maxHeight = (vv.height - 12 - safeTop) + "px";
+};
+window.visualViewport?.addEventListener("resize", fitViewport);
+window.visualViewport?.addEventListener("scroll", fitViewport);
+(() => {  // drag the grabber down to dismiss
+  const grab = document.getElementById("grab"); let y0 = null;
+  grab.onpointerdown = e => { y0 = e.clientY; grab.setPointerCapture(e.pointerId); sheet.style.transition = "none"; };
+  grab.onpointermove = e => { if (y0 != null) sheet.style.transform = `translateY(${Math.max(0, e.clientY - y0)}px)`; };
+  grab.onpointerup = e => {
+    if (y0 == null) return; const dy = e.clientY - y0; y0 = null; sheet.style.transition = "";
+    if (dy > 90) closeSheet(); else sheet.style.transform = "";
+  };
+})();
+const sheetTop = title => el("div", { class: "top" }, el("h3", {}, title), el("button", { class: "x", "aria-label": "Close", onclick: closeSheet }, el("span", {}, icon("x"))));
+
+// An intro ask ("who do you know at X?") is tracked apart from the weekly opener.
+const isDone = (p, introFor) => introFor ? !!session["asked:" + p.url] : marked.has(p.url);
+
+function personSheet(r, { asking = false, introFor = null } = {}) {
+  const p = r.p; sheetR = r;
+  const draftKey = (introFor ? "intro:" : "draft:") + p.url;
+  const box = el("textarea", { id: "draft", rows: 4 });
+  box.value = session[draftKey] ?? opener(r, introFor);
+  const fit = () => { box.style.height = "auto"; box.style.height = box.scrollHeight + "px"; };
+  box.addEventListener("fit", () => requestAnimationFrame(fit));
+  box.oninput = () => { session[draftKey] = box.value; keep(); fit(); };
+  // Copy inside the tap itself so iOS allows it, then open their profile.
+  const copyNow = () => {
+    if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(box.value).then(() => true, () => false);
+    box.select(); let ok = false; try { ok = document.execCommand("copy"); } catch {} return Promise.resolve(ok);
+  };
+  const go = el("a", { class: "btn primary", href: p.url, target: "_blank", rel: "noopener", onclick: () => {
+    copyNow().then(ok => toast(ok ? "Copied. Paste it in LinkedIn." : "Couldn't copy. Select the text and copy it.", null, ok));
+    session.awaiting = { url: p.url, introFor, t: Date.now() }; keep();
+    // Switch to the question after the link opens, so it's waiting when they come back.
+    setTimeout(() => personSheet(r, { asking: true, introFor }), 400);
+  } }, icon("open"), "Copy & open LinkedIn");
+  const copy = el("button", { class: "btn tinted", onclick: () => copyNow().then(ok => {
+    if (ok) { copy.replaceChildren(icon("check"), "Copied"); toast("Message copied"); } else toast("Couldn't copy. Select the text and copy it.", null, false);
+  }) }, icon("copy"), "Copy");
+  const done = isDone(p, introFor);
+  const confirm = () => introFor ? markAsked(r, introFor) : markSent(r);
+  const undo = () => {
+    const key = (introFor ? "asked:" : "done:") + p.url;
+    if (session[key] === WEEK) session["sent:" + WEEK] = Math.max(0, sentThisWeek() - 1);
+    delete session[key]; if (!introFor) marked.delete(p.url); keep(); render(); personSheet(rankOf(p), { introFor });
+  };
+  const status = done
+    ? el("div", { class: "done-row" }, el("span", {}, icon("check"), introFor ? `You asked ${p.first}` : `You messaged ${p.first}`), el("button", { onclick: undo }, "Undo"))
+    : asking ? el("div", { class: "ask" }, el("b", {}, introFor ? `Did you send ${p.first} your ask?` : `Did you message ${p.first}?`),
+        el("div", { class: "pair" }, el("button", { class: "btn green", onclick: confirm }, icon("check"), "Yes, sent"),
+          el("button", { class: "btn plain", onclick: () => { clearAsk(); personSheet(r, { introFor }); } }, "Not yet")))
+    : null;
+  openSheet([
+    sheetTop(introFor ? "Ask for an intro" : r.score ? "Why reach out" : "Connection"),
+    el("div", { class: "who" }, avatar(p, "l"), el("div", {},
+      el("div", { class: "n" }, el("a", { href: p.url, target: "_blank", rel: "noopener" }, p.name)),
+      bylineEl(p))),
+    reasons(r).length ? whyChips(r) : null,
+    asking ? status : el("div", { class: "msg" }, el("label", { for: "draft" }, introFor ? "Your ask" : "Your opener"), box,
+      el("p", { class: "tip" }, "Make it sound like you. People like hearing from students more than you'd think.")),
+    asking ? null : el("div", { class: "stack" }, go, done ? status
+      : el("div", { class: "pair" }, copy, el("button", { class: "btn plain", onclick: confirm }, icon("check"), "I sent it"))),
+    el("div", { class: "subrow", style: "margin-top:6px" }, el("button", { class: "link muted", onclick: () => { if (asking) clearAsk(); fixSheet(r); } }, "Not right for this?")),
+  ], p.name);
+  // Closing the question any way counts as "not now": don't ask again until they open LinkedIn again.
+  if (asking) onClose = clearAsk;
+}
+
+function fixSheet(r) {
+  const p = r.p;
+  const apply = (sessionKey, val, type, key, value, msg) => {
+    const prevBatch = [...(session.batch || [])], before = new Set(batch()), prev = session[sessionKey];
+    session[sessionKey] = val; keep(); save(type, key, value); closeSheet(); render();
+    const added = ranked.find(x => x.p.url === batch().find(u => !before.has(u)));
+    const undo = () => {
+      prev === undefined ? delete session[sessionKey] : session[sessionKey] = prev;
+      session.batch = prevBatch; keep();  // bring back whoever was swapped out
+      save("undo", key, { kind: type }); render(); toast("Undone");
+    };
+    toast(before.has(p.url) && added ? `Got it. Swapped in ${added.p.first}.` : msg, undo);
+  };
+  const opts = [];
+  if (p.role.function !== "unknown") opts.push(el("button", { onclick: () =>
+    apply("title:" + p.titleKey, { function: "other" }, "titles", p.titleKey, { function: "other" }, "Got it. Re-ranked.") },
+    `“${p.position}” isn't really ${WORK[p.role.function] || p.role.function} work`, el("small", {}, "Fixes everyone with this title")));
+  if (p.company) opts.push(el("button", { onclick: () =>
+    apply("org:" + p.orgKey, { kind: "campus_org" }, "orgs", p.orgKey, { kind: "campus_org" }, "Got it. Re-ranked.") },
+    `${p.company} isn't a real company`, el("small", {}, "A club, student program or side project")));
+  opts.push(el("button", { onclick: () => apply("person:" + p.url, true, "person", p.url, true, `${p.first} hidden`) },
+    `I know ${p.first}; not useful for this`, el("small", {}, "Hides them. You can bring them back from Everyone.")));
+  openSheet([
+    sheetTop("What's off?"),
+    el("p", { class: "lead" }, "Your fix re-ranks the list right away and is remembered next time."),
+    el("div", { class: "actions" }, ...opts),
+    el("div", { class: "subrow", style: "margin-top:6px" }, el("button", { class: "link", onclick: () => personSheet(r) }, "Back")),
+  ], "What's off?");
+}
+
+function goalSheet() {
+  // Goals update as you flip them; the list re-ranks once, when the sheet closes, so flipping back and forth can't reshuffle this week.
+  const before = [...goals].sort().join();
+  openSheet([
+    sheetTop("Going for"),
+    el("p", { class: "lead" }, "We guessed these from the jobs you saved on LinkedIn. Turn off any that aren't you."),
+    el("div", { class: "toggles" }, ...DATA.tracks.map(t => {
+      const sw = el("input", { type: "checkbox", class: "switch", role: "switch" });
+      sw.checked = goals.has(t.key);
+      sw.onchange = () => { sw.checked ? goals.add(t.key) : goals.delete(t.key); session.goals = [...goals]; keep(); };
+      return el("label", {}, t.label, sw);
+    })),
+  ], "Going for");
+  onClose = () => { if ([...goals].sort().join() !== before) render(); };
+}
+
+function burst(title, sub) {
+  sheet.append(el("div", { class: "burst" }, el("div", {},
+    el("div", { class: "c" }, icon("check")), el("p", {}, title, el("small", {}, sub)))));
+}
+
+function markSent(r) {
+  const p = r.p, firstEver = marked.size === 0;
+  session["done:" + p.url] = WEEK; marked.add(p.url); session["sent:" + WEEK] = sentThisWeek() + 1; clearAsk();
+  const b = batch(), doneNow = b.filter(u => marked.has(u)).length;
+  const all = b.includes(p.url) && doneNow === b.length;
+  burst(all ? `${b.length} for ${b.length}.` : firstEver ? "First one's the hardest. Done." : "Nice. Message sent.",
+    b.includes(p.url) ? `${doneNow} of ${b.length} this week` : `You reached out to ${p.first}`);
+  freshPip = b.includes(p.url) ? p.url : null;
+  setTimeout(() => {
+    closeSheet();
+    if (all && tab !== "today") showTab("today");
+    render(); if (all) confetti();
+  }, 1100);
+}
+
+function markAsked(r, firms) {
+  const p = r.p;
+  session["asked:" + p.url] = WEEK; session["sent:" + WEEK] = sentThisWeek() + 1; clearAsk();
+  burst("Ask sent.", `If ${p.first} knows someone at ${listOf(firms)}, that's a new way in.`);
+  setTimeout(() => { closeSheet(); render(); }, 1300);
+}
+
+/* ---------- this week's batch ---------- */
+// Up to 3 people. Someone already messaged stays in the batch even if goals or fixes change.
+function batch() {
+  const ok = new Set(ranked.map(r => r.p.url)), here = new Set(people.map(p => p.url));
+  const b = (session.batch || []).filter(u => ok.has(u) || (marked.has(u) && here.has(u)));
+  // ...or anyone already suggested this week as a guide on Companies.
+  const guideUrls = new Set(DATA.tracks.map(t => session["guide:" + t.key]).filter(x => x?.week === WEEK).map(x => x.url));
+  for (const r of ranked) {
+    if (b.length >= 3) break;
+    const u = r.p.url;  // skip anyone already asked for an intro this week: one message per person per week
+    if (!marked.has(u) && !b.includes(u) && session["asked:" + u] !== WEEK && !guideUrls.has(u)) b.push(u);
+  }
+  if (JSON.stringify(b) !== JSON.stringify(session.batch)) { session.batch = b; keep(); }
+  return b;
+}
+let freshPip = null;
+
+/* ---------- screens ---------- */
+function renderGoalLine() {
+  const on = DATA.tracks.filter(t => goals.has(t.key)).map(t => t.label);
+  document.getElementById("goalline").replaceChildren(el("span", { class: "k" }, "Going for"),
+    el("span", { class: "v one" }, on.length ? on.join(", ") : "Choose goals"), chev());
+}
+
+function renderToday() {
+  const b = batch(), rs = b.map(u => rankOf(people.find(p => p.url === u))), done = rs.filter(r => marked.has(r.p.url)).length;
+  const week = document.getElementById("week"), host = document.getElementById("today"), sent = sentThisWeek();
+  if (!rs.length) {
+    week.replaceChildren();
+    host.replaceChildren(el("div", { class: "card celebrate" }, el("h3", { style: "margin-top:0" }, goals.size ? "No one fits these goals yet" : "What are you going for?"),
+      el("p", {}, goals.size ? "Try turning on another goal, or check Companies for where to start." : "Pick a goal and we'll find who to talk to."),
+      el("button", { class: "btn tinted", onclick: goalSheet }, "Choose goals")));
+    return;
+  }
+  const complete = done === rs.length;
+  week.replaceChildren(complete ? "" : el("div", { class: "week", role: "img", "aria-label": `${done} of ${rs.length} messaged this week` },
+    el("span", { class: "t" }, el("b", { class: "num" }, `${done} of ${rs.length}`), " messaged", sent > done ? ` · ${sent} sent this week` : ""),
+    el("div", { class: "pips" }, ...rs.map(r => el("span", { class: "pip" + (marked.has(r.p.url) ? " on" : "") + (freshPip === r.p.url ? " fresh" : "") }, icon("check"))))));
+  freshPip = null;
+
+  const nodes = [];
+  const next = rs.find(r => !marked.has(r.p.url));
+  if (next) {
+    nodes.push(el("article", { class: "card hero" },
+      el("span", { class: "tag" }, icon("star"), next === rs[0] && !marked.size ? "Your best way in" : "Up next"),
+      el("div", { class: "who" }, avatar(next.p, "xl"), el("div", {},
+        el("div", { class: "n" }, next.p.name), bylineEl(next.p))),
+      whyList(next, 3),
+      el("button", { class: "btn primary", onclick: () => personSheet(next) }, icon("send"), `Write to ${next.p.first}`),
+      el("div", { class: "subrow" }, el("button", { class: "link muted", onclick: () => fixSheet(next) }, "Not right?"))));
+    const rest = rs.filter(r => r !== next);
+    if (rest.length) nodes.push(el("div", { class: "section" },
+      el("div", { class: "sh" }, el("h2", {}, "Also this week")), el("div", { class: "card list" }, ...rest.map(mini))));
+  } else {
+    nodes.push(el("div", { class: "card celebrate" },
+      el("div", { class: "ringwrap" }, ring(1, 120, 12, "week-done:" + b.join(), "green"), el("div", { class: "mid" }, el("span", { class: "bigcheck" }, icon("check")))),
+      el("h3", {}, `${rs.length} for ${rs.length}. Done for the week.`),
+      el("p", {}, sent > rs.length ? `You've sent ${sent} messages this week. Replies usually take a few days, so give them time.`
+        : "Sending is the hard part. Replies usually take a few days, so give them time."),
+      ranked.some(r => !marked.has(r.p.url)) ? el("button", { class: "btn tinted", onclick: () => { session.batch = []; keep(); render(); scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" }); } }, "Want 3 more now?") : null),
+      el("div", { class: "section" }, el("div", { class: "sh" }, el("h2", {}, "Sent")), el("div", { class: "card list" }, ...rs.map(mini))));
+  }
+  host.replaceChildren(...nodes);
+  const more = ranked.filter(r => !b.includes(r.p.url)).length, toAll = document.getElementById("to-all");
+  toAll.hidden = more <= 0;
+  toAll.textContent = `${more} more ranked in Everyone →`;
+}
+
+function mini(r) {
+  const p = r.p, done = marked.has(p.url), top = reasons(r).find(x => x[0] !== "work") || reasons(r)[0];
+  return el("button", { class: "mini" + (done ? " done" : ""), onclick: () => personSheet(r) },
+    avatar(p),
+    el("div", { class: "body" }, el("div", { class: "n one" }, p.name), bylineEl(p, "r split"),
+      top && !done ? el("div", { class: "hint" + (top[2] ? " warm" : "") }, icon(top[0]), el("span", {}, top[1])) : null),
+    el("span", { class: "cta" }, done ? el("span", { class: "sent" }, icon("check"), "Sent")
+      : el("span", { class: "pill", "aria-label": `Write to ${p.first}` }, icon("send"), "Write")));
+}
+
+function renderTargets() {
+  const saved = DATA.targets.filter(t => t.kind === "saved");
+  const atOrg = new Map();
+  for (const p of people) if (p.orgKey) (atOrg.get(p.orgKey) || atOrg.set(p.orgKey, []).get(p.orgKey)).push(p);
+  const covered = saved.filter(t => atOrg.has(t.key)), open = saved.filter(t => !atOrg.has(t.key));
+  const host = document.getElementById("targets"), b = batch();
+  const big = el("span", { class: "big num" });
+  countUp(big, covered.length, "cov-num");
+  const nodes = [
+    el("div", { class: "card cover" },
+      el("div", { class: "ringwrap", role: "img", "aria-label": `A way in at ${covered.length} of ${saved.length} companies` },
+        ring(saved.length ? covered.length / saved.length : 0, 168, 13, "cov-ring"),
+        el("div", { class: "mid" }, big, el("span", { class: "of" }, `of ${saved.length} companies`))),
+      el("p", {}, covered.length ? `You already know someone at ${covered.length} of the companies where you saved jobs.`
+        : "You don't know anyone at your saved-job companies yet. That's normal, and it's where we come in."),
+      el("small", {}, "The ring fills as your network grows.")),
+  ];
+  if (covered.length) nodes.push(el("div", { class: "section" }, el("p", { class: "gh" }, "You have a way in"),
+    el("div", { class: "card list" }, ...covered.map(t => {
+      const ps = atOrg.get(t.key).map(rankOf).sort((a, b) => b.score - a.score);
+      return el("button", { class: "row", onclick: () => personSheet(ps[0]) }, logo(t.name, "s"),
+        el("div", { class: "body" }, el("div", { class: "n one" }, t.name),
+          el("div", { class: "r one" }, `${ps.length} ${ps.length > 1 ? "people" : "person"} you know · ${ps.slice(0, 2).map(r => r.p.first).join(", ")}`)), chev());
+    }))));
+
+  // Next: for open targets, the best person already doing that kind of work elsewhere asks who they know there.
+  // One guide per goal, kept for the week; each open company is asked about by only one guide.
+  const guides = new Set(), used = new Set(), steps = [];
+  for (const g of goals) { const k = session["guide:" + g]; if (k?.week === WEEK) open.filter(t => k.firms.includes(t.name)).forEach(t => used.add(t.key)); }
+  for (const g of goals) {
+    const kept = session["guide:" + g], keptR = kept?.week === WEEK && ranked.find(r => r.p.url === kept.url);
+    let guide, ask, firms;
+    if (keptR && !b.includes(kept.url) && !guides.has(kept.url)) {
+      guide = keptR; ask = kept.firms; firms = ask;
+    } else {
+      const free = open.filter(t => t.hires.includes(g) && !used.has(t.key));
+      // Someone outside this week's 3, never messaged or asked, so nobody gets two messages in one week.
+      guide = ranked.find(r => r.tracks.includes(g) && !guides.has(r.p.url) && !b.includes(r.p.url) && !marked.has(r.p.url) && !session["asked:" + r.p.url]);
+      if (!free.length || !guide) continue;
+      firms = free.map(t => t.name); ask = firms.slice(0, 3);
+      session["guide:" + g] = { week: WEEK, url: guide.p.url, firms: ask }; keep();
+    }
+    open.filter(t => ask.includes(t.name)).forEach(t => used.add(t.key));
+    guides.add(guide.p.url);
+    steps.push(el("button", { class: "row step", onclick: () => personSheet(guide, { introFor: ask }) },
+      el("span", { class: "ic" }, icon("bulb")),
+      el("div", { class: "body" }, el("div", { class: "n" }, LABEL[g]),
+        el("div", { class: "r" }, `Ask ${guide.p.first}${guide.p.position ? ` (${byline(guide.p)})` : ""} who they know at ${listOf(firms.length > 3 ? [...ask, `${firms.length - 3} more`] : ask)}.`)),
+      session["asked:" + guide.p.url] ? el("span", { class: "sent" }, icon("check"), "Asked") : chev()));
+  }
+  if (steps.length) nodes.push(el("div", { class: "section" }, el("p", { class: "gh" }, "Your next way in"), el("div", { class: "card list" }, ...steps)));
+
+  const showAll = !!host.dataset.all, shown = showAll ? open : open.slice(0, 8);
+  if (open.length) nodes.push(el("div", { class: "section" }, el("p", { class: "gh" }, `No way in yet · ${open.length}`),
+    el("div", { class: "card" }, el("div", { class: "grid" }, ...shown.map(t => el("div", { class: "co", title: t.name },
+        el("span", { style: "position:relative" }, logo(t.name), el("span", { class: "lk" }, icon("lock"))), el("span", { class: "nm" + (/\s/.test(t.name.trim()) ? "" : " word") }, t.name)))),
+      open.length > 8 ? el("button", { class: "more", onclick: () => { showAll ? delete host.dataset.all : host.dataset.all = "1"; renderTargets(); } },
+        showAll ? "Show less" : `Show all ${open.length}`) : null)));
+  nodes.push(el("div", { class: "card loop" }, icon("people"),
+    el("span", {}, `When classmates join, we'll check their connections for the other ${open.length} companies and tell you who can introduce you.`)));
+  host.replaceChildren(...nodes);
+}
+
+let segI = 0;
+function renderAll() {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const unsure = people.filter(p => !ranked.some(r => r.p === p) && (p.org.kind === "unknown" || p.role.function === "unknown")
+    && (p.role.domains.length || ["engineering", "research", "quant", "data", "finance", "founder_exec"].includes(p.role.function)));
+  const seg = document.getElementById("seg"); seg.dataset.i = segI;
+  const [a, b] = seg.querySelectorAll("button");
+  a.textContent = `Ranked · ${ranked.length}`; b.textContent = `Couldn't judge · ${unsure.length}`;
+  a.setAttribute("aria-pressed", String(segI === 0)); b.setAttribute("aria-pressed", String(segI === 1));
+  const match = p => !q || [p.name, p.company, p.position].some(s => s.toLowerCase().includes(q));
+  const rows = (segI === 0 ? ranked : unsure.map(p => ({ p, tracks: [], score: 0 }))).filter(r => match(r.p));
+  const row = (r, i) => el("button", { class: "row", onclick: () => personSheet(r) },
+    segI === 0 ? el("span", { class: "rk num" }, i + 1) : null, avatar(r.p, "s"),
+    el("div", { class: "body" }, el("div", { class: "n one" }, r.p.name), bylineEl(r.p, "r split")), chev());
+  const nodes = [rows.length ? el("div", { class: "section", style: "margin-top:16px" },
+      el("div", { class: "card list" + (segI === 0 ? " ranked" : "") }, ...rows.map(row)),
+      el("p", { class: "foot" }, segI === 0 ? `Out of your ${DATA.total} connections, these do the work you're going for, or work where you're aiming.`
+        : "We couldn't tell what these companies or roles are, so they aren't ranked. Tap one to fix it if you know."))
+    : el("p", { class: "empty" }, q ? `No one matches “${q}”` : "Nothing here.")];
+  const hidden = DATA.people.map(view).filter(p => p.hidden && match(p));
+  if (segI === 0 && hidden.length) nodes.push(el("div", { class: "section" }, el("p", { class: "gh" }, `Hidden · ${hidden.length}`),
+    el("div", { class: "card list" }, ...hidden.map(p => el("div", { class: "row" }, avatar(p, "s"),
+      el("div", { class: "body" }, el("div", { class: "n one" }, p.name), bylineEl(p, "r split")),
+      el("button", { class: "unhide", onclick: () => { session["person:" + p.url] = false; keep(); save("undo", p.url, { kind: "person" }); render(); toast(`${p.first} is back`); } }, "Unhide"))))));
+  document.getElementById("all").replaceChildren(...nodes);
+}
+document.getElementById("q").oninput = renderAll;
+document.querySelectorAll("#seg button").forEach(b => b.onclick = () => { segI = +b.dataset.i; renderAll(); });
+
+function render() {
+  people = DATA.people.map(view).filter(p => !p.hidden);
+  ranked = people.map(score).filter(r => r.score > 0).sort((a, b) => b.score - a.score);
+  renderGoalLine(); renderToday(); renderTargets(); renderAll();
+  observeNavs();
+}
+
+/* ---------- tabs + collapsing nav ---------- */
+const scrollPos = {};
+let tab = "today";
+function showTab(name) {
+  scrollPos[tab] = scrollY; tab = name;
+  document.querySelectorAll(".tab").forEach(x => x.dataset.tab === name ? x.setAttribute("aria-current", "page") : x.removeAttribute("aria-current"));
+  document.querySelectorAll(".screen").forEach(s => s.hidden = s.id !== "s-" + name);
+  scrollTo(0, scrollPos[name] || 0);
+  observeNavs();
+}
+document.querySelectorAll(".tab").forEach(t => t.onclick = () =>
+  t.dataset.tab === tab ? scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" }) : showTab(t.dataset.tab));
+// The small title shows once the large title has slid under the bar, as in iOS.
+function observeNavs() {
+  const scr = document.getElementById("s-" + tab), nav = scr.querySelector(".nav");
+  nav.classList.toggle("scrolled", scr.querySelector("h1").getBoundingClientRect().bottom <= nav.offsetHeight);
+}
+let navFrame = 0;
+addEventListener("scroll", () => { cancelAnimationFrame(navFrame); navFrame = requestAnimationFrame(observeNavs); }, { passive: true });
+function setDate() { document.getElementById("date").textContent = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }); }
+setDate();
+document.getElementById("goalline").onclick = goalSheet;
+
+/* ---------- first-run recap ---------- */
+function intro() {
+  const box = document.getElementById("intro"), active = DATA.tracks.filter(t => goals.has(t.key));
+  const saved = DATA.targets.filter(t => t.kind === "saved");
+  const orgs = new Set(people.map(p => p.orgKey));
+  const covered = saved.filter(t => orgs.has(t.key)).length;
+  const best = ranked[0];
+  const n = (to, key, suffix) => { const s = el("span", { class: "num" }); countUp(s, to, key, 1100); return el("div", { class: "hn" }, s, suffix || null); };
+  const cards = [
+    () => [el("div", { class: "k" }, "Your network"), n(DATA.total, "i0"), el("h2", {}, "connections, read one by one."),
+      el("p", {}, "We looked at what each person does and where, to find who can actually help with what you want.")],
+    () => [el("div", { class: "k" }, "Doing what you want"), n(ranked.length, "i1"), el("h2", {}, ranked.length === 1 ? "of them is doing the work you're going for." : "of them are doing the work you're going for."),
+      el("div", { class: "chips" }, ...active.map(t => el("span", {}, t.label))),
+      el("p", {}, "Everyone else is still worth knowing. Just not for this.")],
+    () => [el("div", { class: "k" }, "Your target companies"), n(covered, "i2", el("small", {}, ` / ${saved.length}`)),
+      el("h2", {}, covered ? "You already know someone inside." : "No one inside yet. That's normal."),
+      el("div", { class: "dots" }, ...saved.slice(0, 30).map((t, i) => el("i", { class: i < covered ? "on" : "" }))),
+      el("p", {}, "These are the companies where you saved jobs. Each person you talk to can open more of them.")],
+    ...(best ? [() => [el("div", { class: "k" }, "Start here"), el("h2", { style: "margin-top:18px" }, `Your best way in is ${best.p.first}.`),
+      el("div", { class: "who", style: "margin-top:26px" }, avatar(best.p, "xl"), el("div", {},
+        el("div", { class: "n" }, best.p.name), bylineEl(best.p))),
+      whyList(best, 3)]] : []),
+  ];
+  let i = 0;
+  const finish = () => {
+    try { localStorage.setItem("talk-intro-seen", "1"); } catch {}
+    removeEventListener("keydown", keys);
+    box.style.transition = "opacity .35s"; box.style.opacity = "0";
+    setTimeout(() => { box.hidden = true; box.style.opacity = ""; document.body.classList.remove("locked"); shell.forEach(n => n.inert = false); }, reduce ? 0 : 350);
+  };
+  const go = d => { const j = i + d; if (j >= 0 && j < cards.length) { i = j; show(); } };
+  const show = () => {
+    const last = i === cards.length - 1;
+    const stage = el("div", { class: "stage", "aria-live": "polite", tabindex: "-1" }, el("div", { class: "rise" }, ...cards[i]()));
+    const bottom = el("div", { class: "bottom" }, last
+      ? el("button", { class: "btn white", onclick: e => { e.stopPropagation(); finish(); } }, best ? "See who to talk to this week" : "Pick your goals")
+      : el("button", { class: "next", onclick: e => { e.stopPropagation(); go(1); } }, "Tap to continue"));
+    box.replaceChildren(...[el("div", { class: "bars", "aria-hidden": "true" }, ...cards.map((_, j) => el("i", { class: j <= i ? "on" : "" }))),
+      !last && el("button", { class: "skip", onclick: e => { e.stopPropagation(); finish(); } }, "Skip"), stage, bottom].filter(Boolean));
+    stage.focus({ preventScroll: true });
+  };
+  const keys = e => {
+    if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); go(1); }
+    else if (e.key === "ArrowLeft") go(-1);
+    else if (e.key === "Escape") finish();
+  };
+  box.onclick = e => go(i > 0 && e.clientX < innerWidth / 3 ? -1 : 1);
+  ["i0", "i1", "i2"].forEach(k => animated.delete(k));
+  addEventListener("keydown", keys);
+  box.hidden = false; document.body.classList.add("locked"); shell.forEach(n => n.inert = true); show();
+}
+document.getElementById("replay").onclick = intro;
+document.getElementById("to-all").onclick = () => showTab("all");
+
+render();
+let seen = false;
+try { seen = !!localStorage.getItem("talk-intro-seen"); } catch {}
+if (!seen) intro(); else askIfPending();
+</script>
+</body>
+</html>
